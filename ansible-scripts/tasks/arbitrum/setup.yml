@@ -1,0 +1,33 @@
+---
+    - name: Create Arbitrum folder at home
+      ansible.builtin.file:
+        path: "/home/{{ ansible_user }}/arbitrum"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+      
+    - name: Create Nova service file
+      copy:
+        content: |
+          [Unit]
+          Description=Nitro Node Service
+          After=docker.service
+          Requires=docker.service
+
+          [Service]
+          ExecStart=/usr/bin/docker run -p 8547:8547 -p 8548:8548 -p 8549:8549 -p 6070:6070 -v /home/{{ ansible_user }}/arbitrum:/home/user/.arbitrum offchainlabs/nitro-node:v2.2.2-8f33fea --parent-chain.connection.url=<place-endpoint-here> --chain.name=goerli-rollup --http.api=net,web3,eth,debug --http.corsdomain=* --http.addr=0.0.0.0 --http.vhosts=* --node.staker.enable=false --log-level=3 --log-type=plaintext --metrics --metrics-server.port=6070 --metrics-server.update-interval=3s --metrics-server.addr=0.0.0.0
+          
+          Restart=always
+          RestartSec=10s
+
+          [Install]
+          WantedBy=default.target
+          
+        dest: "/etc/systemd/system/nova.service"
+
+    - name: Reload systemd and restart service
+      systemd:
+        daemon_reload: yes
+        name: nova.service
+        state: restarted

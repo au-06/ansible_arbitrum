@@ -1,0 +1,8 @@
+---
+- name: Setup and Install Arbitrum Goerli
+  hosts: arbitrumGoerli
+  become: true
+  tasks:
+    - import_tasks: ../tasks/common/cleanup.yml
+    - import_tasks: ../tasks/common/setup_docker.yml
+    - import_tasks: ../tasks/arbitrum/setup.yml
